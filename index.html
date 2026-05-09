@@ -3,89 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium 3D Shoes Store - Local & Luxury</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>ShoeZone - Premium Shoes Collection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Admin Panel Styles */
+        .admin-lock {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999; display: none;
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        .admin-lock.active { display: flex; }
+        .admin-lock input { padding: 15px; font-size: 1.2em; margin: 15px; border-radius: 10px; }
+        .admin-lock button { padding: 12px 30px; background: #4CAF50; color: white; border: none; border-radius: 8px; }
+        
+        .admin-toggle {
+            position: fixed; top: 20px; right: 20px;
+            background: #ff9800; color: white; border: none;
+            padding: 12px 25px; border-radius: 30px; cursor: pointer;
+            z-index: 1000; font-weight: bold;
+        }
+        
+        .admin-panel {
+            background: white; padding: 20px; margin: 20px;
+            border-radius: 15px; display: none;
+        }
+        .admin-panel input, .admin-panel select {
+            padding: 10px; margin: 5px; border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 80px 20px 20px; }
+        
+        header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; padding: 60px; text-align: center;
+            border-radius: 30px; margin-bottom: 40px;
+        }
+        
+        .filters {
+            display: flex; gap: 15px; justify-content: center;
+            margin-bottom: 40px; flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 12px 30px; border: none; border-radius: 30px;
+            background: white; cursor: pointer; transition: 0.3s;
+            font-weight: bold;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .shoes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .shoe-card {
+            background: white; border-radius: 20px;
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .shoe-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .shoe-img {
+            width: 100%; height: 250px; object-fit: cover;
+        }
+        
+        .shoe-info {
+            padding: 20px;
+        }
+        
+        .shoe-name {
+            font-size: 1.4em; margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .shoe-price {
+            color: #667eea; font-size: 1.3em;
+            font-weight: bold; margin: 10px 0;
+        }
+        
+        .shoe-category {
+            display: inline-block; padding: 5px 15px;
+            background: #f0f0f0; border-radius: 20px;
+            font-size: 0.85em; margin-top: 10px;
+        }
+        
+        /* Modal for zoom */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            z-index: 10000; align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-img {
+            max-width: 90%; max-height: 90%;
+            border-radius: 15px;
+        }
+        .close-modal {
+            position: absolute; top: 20px; right: 40px;
+            color: white; font-size: 40px; cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .shoes-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+            header { padding: 40px; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="navbar">
-            <div class="nav-brand">
-                <h2><i class="fas fa-shoe-prints"></i> ShoeHub</h2>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#premium">Premium</a></li>
-                <li><a href="#local">Local</a></li>
-                <li><a href="#about">About</a></li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </nav>
+
+<div class="admin-lock" id="adminLock">
+    <h2 style="color:white;">Admin Login</h2>
+    <input type="password" id="adminPass" placeholder="Password">
+    <button onclick="checkAdmin()">Unlock</button>
+    <p style="color:white; margin-top:15px;">Password: admin123</p>
+</div>
+
+<button class="admin-toggle" id="adminToggle">🔧 Admin Panel</button>
+
+<div class="admin-panel" id="adminPanel">
+    <h3>➕ Add New Shoe</h3>
+    <input type="text" id="shoeName" placeholder="Shoe Name">
+    <input type="text" id="shoePrice" placeholder="Price (₹)">
+    <select id="shoeCat">
+        <option value="Sports">🏃 Sports</option>
+        <option value="Casual">👞 Casual</option>
+        <option value="Formal">👔 Formal</option>
+        <option value="Running">🏃‍♂️ Running</option>
+    </select>
+    <input type="text" id="shoeImg" placeholder="Image URL">
+    <button onclick="addShoe()">➕ Add Shoe</button>
+    <hr style="margin: 20px 0;">
+    <h3>📊 Manage Shoes</h3>
+    <div id="adminShoeList"></div>
+</div>
+
+<div class="container">
+    <header>
+        <h1>👟 ShoeZone Premium</h1>
+        <p>Best Collection of Sports, Casual & Formal Shoes</p>
     </header>
+    
+    <div class="filters">
+        <button class="filter-btn active" data-category="all">All</button>
+        <button class="filter-btn" data-category="Sports">🏃 Sports</button>
+        <button class="filter-btn" data-category="Casual">👞 Casual</button>
+        <button class="filter-btn" data-category="Formal">👔 Formal</button>
+        <button class="filter-btn" data-category="Running">🏃‍♂️ Running</button>
+    </div>
+    
+    <div class="shoes-grid" id="shoesGrid"></div>
+</div>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1>Premium & Local <span class="highlight">3D Shoes</span></h1>
-            <p>Experience luxury meets tradition. Rotate, zoom & try virtually!</p>
-            <button class="cta-btn">Explore Collection</button>
-        </div>
-        <div class="hero-3d">
-            <canvas id="heroCanvas"></canvas>
-        </div>
-    </section>
+<!-- Modal for zoom -->
+<div class="modal" id="imageModal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="modal-img" id="modalImg" src="">
+</div>
 
-    <!-- Shoes Grid -->
-    <section id="shoes-grid" class="shoes-grid">
-        <div class="container">
-            <h2 class="section-title">Our Collection</h2>
-            <div class="filter-tabs">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="premium">Premium</button>
-                <button class="filter-btn" data-filter="local">Local</button>
-            </div>
-            <div class="shoes-container" id="shoesContainer">
-                <!-- Shoes will load here -->
-            </div>
-        </div>
-    </section>
-
-    <!-- 3D Viewer Modal -->
-    <div id="shoeModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="modal-header">
-                <h3 id="modalTitle"></h3>
-                <div class="price-tag" id="modalPrice"></div>
-            </div>
-            <div class="modal-body">
-                <canvas id="modalCanvas"></canvas>
-                <div class="viewer-controls">
-                    <button id="rotateLeft"><i class="fas fa-undo"></i></button>
-                    <button id="rotateRight"><i class="fas fa-redo"></i></button>
-                    <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
-                    <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+<script>
+    let shoes = [
+        { name: "Nike Air Max", price: "₹8,999", category: "Sports", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" },
+        { name: "Adidas Ultraboost", price: "₹12,999", category: "Running", img: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=300&fit=crop" },
+        { name: "Puma Suede Classic", price: "₹4,999", category: "Casual", img: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=300&fit=crop" },
+        { name: "Woodland Boots", price: "₹3,999", category: "Casual", img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=300&fit=crop" },
+        { name: "Bata Formal", price: "₹2,499", category: "Formal", img: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=400&h=300&fit=crop" },
+        { name: "Nike Jordan", price: "₹14,999", category: "Sports", img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&h=300&fit=crop" },
+        { name: "Reebok Classic", price: "₹3,999", category: "Casual", img: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=400&h=300&fit=crop" },
+        { name: "ASICS Running", price: "₹7,999", category: "Running", img: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=400&h=300&fit=crop" },
+        { name: "Hush Puppies", price: "₹4,499", category: "Formal", img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=300&fit=crop" },
+        { name: "Skechers", price: "₹5,999", category: "Sports", img: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&h=300&fit=crop" },
+        { name: "Vans Old Skool", price: "₹4,499", category: "Casual", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&h=300&fit=crop" },
+        { name: "New Balance", price: "₹6,999", category: "Running", img: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=300&fit=crop" },
+        { name: "Louis Vuitton", price: "₹45,999", category: "Formal", img: "https://images.unsplash.com/photo-1531310197839-ccf8d9b2c13e?w=400&h=300&fit=crop" },
+        { name: "Under Armour", price: "₹6,499", category: "Sports", img: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?w=400&h=300&fit=crop" },
+        { name: "Red Tape", price: "₹2,999", category: "Formal", img: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=400&h=300&fit=crop" }
+    ];
+    
+    let currentFilter = "all";
+    
+    function renderShoes() {
+        const filtered = currentFilter === "all" 
+            ? shoes 
+            : shoes.filter(s => s.category === currentFilter);
+        
+        const grid = document.getElementById('shoesGrid');
+        grid.innerHTML = filtered.map((shoe, index) => `
+            <div class="shoe-card" onclick="openModal('${shoe.img}')">
+                <img src="${shoe.img}" class="shoe-img" alt="${shoe.name}" onerror="this.src='https://via.placeholder.com/400x300?text=Shoe+Image'">
+                <div class="shoe-info">
+                    <h3 class="shoe-name">${shoe.name}</h3>
+                    <div class="shoe-price">${shoe.price}</div>
+                    <span class="shoe-category">${shoe.category}</span>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="add-cart">Add to Cart - <span id="modalCartPrice"></span></button>
+        `).join('');
+    }
+    
+    function renderAdminList() {
+        const list = document.getElementById('adminShoeList');
+        list.innerHTML = shoes.map((shoe, index) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ddd;">
+                <span>${shoe.name} - ${shoe.price}</span>
+                <button onclick="deleteShoe(${index})" style="background:#f44336; color:white; border:none; padding:5px 15px; border-radius:5px;">Delete</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 ShoeHub. Premium Quality | Local Pride</p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+        `).join('');
+    }
+    
+    function addShoe() {
+        const name = document.getElementById('shoeName').value;
+        const price = document.getElementById('shoePrice').value;
+        const category = document.getElementById('shoeCat').value;
+        let img = document.getElementById('shoeImg').value;
+        
+        if(!name || !price) {
+            alert("Please enter name and price!");
+            return;
+        }
+        
+        if(!img) {
+            img = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop";
+        }
+        
+        shoes.push({ name, price, category, img });
+        renderShoes();
+        renderAdminList();
+        
+        document.getElementById('shoeName').value = '';
+        document.getElementById('shoePrice').value = '';
+        document.getElementById('shoeImg').value = '';
+        
+        alert("Shoe added successfully!");
+    }
+    
+    function deleteShoe(index) {
+        shoes.splice(index, 1);
+        renderShoes();
+        renderAdminList();
+        alert("Shoe deleted!");
+    }
+    
+    function openModal(imgSrc) {
+        document.getElementById('modalImg').src = imgSrc;
+        document.getElementById('imageModal').classList.add('active');
+    }
+    
+    function closeModal() {
+        document.getElementById('imageModal').classList.remove('active');
+    }
+    
+    function checkAdmin() {
+        const pwd = document.getElementById('adminPass').value;
+        if(pwd === "admin123") {
+            localStorage.setItem('adminLoggedIn', 'true');
+            document.getElementById('adminLock').classList.remove('active');
+            document.getElementById('adminPanel').style.display = 'block';
+            alert("Access Granted!");
+        } else {
+            alert("Wrong Password!");
+        }
+    }
+    
+    document.getElementById('adminToggle').addEventListener('click', () => {
+        if(localStorage.getItem('adminLoggedIn') === 'true') {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        } else {
+            document.getElementById('adminLock').classList.add('active');
+        }
+    });
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.category;
+            renderShoes();
+        });
+    });
+    
+    window.onload = () => {
+        renderShoes();
+        renderAdminList();
+        if(localStorage.getItem('adminLoggedIn') === 'true') {
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+    };
+</script>
 </body>
 </html>
